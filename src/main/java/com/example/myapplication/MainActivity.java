@@ -20,6 +20,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -38,7 +40,7 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     TextView tx;
-    SilentTools tool;
+    //SilentTools tool;
     EditText silentDB;
     EditText issueTime;
     Button btStart;
@@ -59,9 +61,37 @@ public class MainActivity extends AppCompatActivity {
     private float degree = 0.0f;
     private GraphicalView mView;
     private LinearLayout dbChart;
+    private DataReceiver dataReceiver;
     private int t = 0;
+    private Intent intent;
 
     BluetoothUtils btUtils;
+
+    @Override
+    protected void onStart()
+    {
+        dataReceiver = new DataReceiver();
+        IntentFilter filter = new IntentFilter();// 创建IntentFilter对象
+        filter.addAction("com.example.myapplication.service");
+        registerReceiver(dataReceiver, filter);// 注册Broadcast Receiver
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    private class DataReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,9 +125,6 @@ public class MainActivity extends AppCompatActivity {
                         String DB = msg.obj.toString();
                         Log.i(TAG,"DB:"+DB);
                         tx.setText(DB+"");
-                        if(tool.isSilent(Double.parseDouble(DB))){
-                            tx.setTextColor(Color.RED);
-                        }
                         if ("-Infinity".equals( msg.obj.toString())) {
                             degree=0f;
                         }else {
@@ -114,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                          startAlert();
                          Toast.makeText(getApplicationContext(), "Silent Issue!!! Stop Listen", Toast.LENGTH_LONG).show();
                          MyUtils.startBug2go("silent issue",thisActivity);
-                         tool.stopGetVoice();
+                         //tool.stopGetVoice();
                          btStart.setText("START Listen");
                          isStart = false;
                     default:
@@ -147,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             //Already Granted
             isRecord = true;
         }
-        tool = new SilentTools(DBhandler,thisActivity);
+        //tool = new SilentTools(DBhandler,thisActivity);
 
         btStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,19 +185,28 @@ public class MainActivity extends AppCompatActivity {
                     isStart = true;
                     String silentDBText = silentDB.getText() + "";
                     String issueTimeText = issueTime.getText() + "";
+                    int silentDB = 50;
+                    int issueTime = 10000;
                     try {
                         if (!"".equals(silentDBText))
-                            tool.setSilentDB(Integer.parseInt(silentDBText));
+                            //tool.setSilentDB(Integer.parseInt(silentDBText));
+                            silentDB= Integer.parseInt(silentDBText);
                         if (!"".equals(issueTimeText))
-                            tool.setIssueTime(Integer.parseInt(issueTimeText));
+                            //tool.setIssueTime(Integer.parseInt(issueTimeText));
+                            issueTime=Integer.parseInt(issueTimeText);
                     } catch (NumberFormatException e) {
                         Log.e(TAG, e.getMessage());
                     }
                     //handler.postDelayed(task, 1000);
-                    Log.i(TAG, isRecord + "");
+                    Log.i(TAG, "isRecord"+isRecord + "");
                     if (isRecord) {
                         btStart.setText("Listening, click to STOP");
-                        tool.startGetNoise();
+                        //tool.startGetNoise();
+                        intent = new Intent(thisActivity, NotificationService.class);
+                        intent.putExtra(Constant.INTENT_EXTRA_ISSUE_TIME,issueTime);
+                        intent.putExtra(Constant.INTENT_EXTRA_SILENT_DB,silentDB);
+                        intent.putExtra("messenger", new Messenger(DBhandler));
+                        startService(intent);
                     }else{
                         Toast.makeText(getApplicationContext(), "Record Permission Denied!!!", Toast.LENGTH_SHORT).show();
                     }
@@ -178,8 +214,8 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     btStart.setText("START Listen");
                     isStart = false;
-                    tool.stopGetVoice();
-
+                    stopService(intent);
+                    //tool.stopGetVoice();
                 }
             }
         });
@@ -226,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         mediaPlayer.release();
         preMP.release();
-        tool.stopGetVoice();
+        //tool.stopGetVoice();
         unregisterReceiver(btReceiver);
     }
 

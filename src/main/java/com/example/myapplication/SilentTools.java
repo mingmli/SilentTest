@@ -7,6 +7,8 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -16,7 +18,7 @@ import java.util.logging.LogRecord;
 
 public class SilentTools {
 
-    private static final String TAG = "Record_Tools";
+    private static final String TAG = "silent_Tools";
     static final int SAMPLE_RATE_IN_HZ = 8000;
     static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE_IN_HZ,
             AudioFormat.CHANNEL_IN_DEFAULT, AudioFormat.ENCODING_PCM_16BIT);
@@ -33,14 +35,14 @@ public class SilentTools {
     int mIssueTime;
     private static final boolean DEBUG = false;
     private Context mContext;
-    private Handler myHandler = new Handler();
+    private Messenger myHandler;
     AudioManager musicManager;
 
-    public void setMyHandler(Handler handle){
+    public void setMyHandler(Messenger handle){
         myHandler = handle;
     }
 
-    public SilentTools(Handler handle, Context context) {
+    public SilentTools(Messenger handle, Context context) {
         mLock = new Object();
         mVolume = -1;
         mSilentDB = 50;
@@ -82,6 +84,7 @@ public class SilentTools {
 
 
     public void startGetNoise() {
+        Log.i(TAG,"startGetNoise");
         if (isGetVoiceRun) {
             Log.e(TAG, "isGetVocieRun:"+isGetVoiceRun);
             return;
@@ -124,7 +127,13 @@ public class SilentTools {
                     Message msg = Message.obtain();
                     msg.what=Constant.MESSAGE_DB;
                     msg.obj=volume;
-                    if(myHandler!=null) myHandler.sendMessage(msg);
+                    if(myHandler!=null) {
+                        try {
+                            myHandler.send(msg);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     // 大概一秒一次
                     synchronized (mLock) {
                         try {
@@ -136,7 +145,11 @@ public class SilentTools {
                     if(isSilentIssue()){
                         Message msg1 = Message.obtain();
                         msg1.what = Constant.MESSAGE_ISSILENT;
-                        myHandler.sendMessage(msg1);
+                        try {
+                            myHandler.send(msg1);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 mAudioRecord.stop();
