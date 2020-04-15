@@ -146,6 +146,7 @@ public class SilentTools {
                         msg1.what = Constant.MESSAGE_ISSILENT;
                         try {
                             myHandler.send(msg1);
+                            isGetVoiceRun = false;//Avoid trigger many times
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }

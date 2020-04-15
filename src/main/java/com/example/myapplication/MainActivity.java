@@ -155,13 +155,16 @@ public class MainActivity extends AppCompatActivity {
                         break;
                      case Constant.MESSAGE_ISSILENT:
                          //Vibrate, alert, toast, bugreport
-                         Vibrator vibrator = (Vibrator)thisActivity.getSystemService(thisActivity.VIBRATOR_SERVICE);
-                         vibrator.vibrate(VibrationEffect.createOneShot(200,255));
-                         startAlert();
-                         Toast.makeText(getApplicationContext(), "Silent Issue!!! Stop Listen", Toast.LENGTH_LONG).show();
-                         MyUtils.startBug2go("silent issue",thisActivity);
-                         //tool.stopGetVoice();
-                         btStart.setText("START Listening");
+                         //avoid triggered multiple timess
+                         if(isStart) {
+                             Vibrator vibrator = (Vibrator)thisActivity.getSystemService(thisActivity.VIBRATOR_SERVICE);
+                             vibrator.vibrate(VibrationEffect.createOneShot(200,255));
+                             //startAlert();
+                             Toast.makeText(getApplicationContext(), "Silent Issue!!! Stop Listen", Toast.LENGTH_LONG).show();
+                             MyUtils.startBug2go("silent issue",thisActivity);
+                             btStart.setText("RESTART Listening");
+                             stopService(intent);
+                         }
                          isStart = false;
                     default:
                         break;
