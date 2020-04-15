@@ -160,7 +160,6 @@ public class FbChartline {
         if (gCount < 100)
         {//100个点以内的，直接添加进去就行
         	mSeries.add(length+1, addY);
-            Log.e("ddd", "gCount:"+gCount+" series.getItemCount:"+mSeries.getItemCount());
         }
         else
         {   //超过100，要去除第一个点，整体左移一个，在100点处添加新的点

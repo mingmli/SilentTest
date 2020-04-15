@@ -63,24 +63,7 @@ public class NotificationService extends Service {
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-
-        //getNoise in Service
-        /*mThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mAudioRecord.startRecording();
-                while(isStartListen) {
-                    short[] buffer = new short[BUFFER_SIZE];
-                    int r = mAudioRecord.read(buffer, 0, BUFFER_SIZE);
-                    Log.i(TAG, "r:" + r);
-                }
-                mAudioRecord.stop();
-                mAudioRecord.release();
-                mAudioRecord = null;
-            }
-        });
-        mThread.start();*/
-        showNotification("listening:");
+        showNotification("listening...");
     }
     private void showNotification(String db){
         PendingIntent pendingIntent = PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT);
@@ -99,10 +82,9 @@ public class NotificationService extends Service {
         super.onDestroy();
         isStartListen = false;
         if(tool!=null)
-           //tool.stopGetVoice();
+           tool.stopGetVoice();
         if(notificationManager!=null)
             notificationManager.cancel(NOTIFICATION);
-        tool.stopGetVoice();
     }
 
     public void onClearNotify(){

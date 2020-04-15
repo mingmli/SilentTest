@@ -1,4 +1,4 @@
-package com.wj.bluetoothautotest;
+package com.example.myapplication;
 
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;

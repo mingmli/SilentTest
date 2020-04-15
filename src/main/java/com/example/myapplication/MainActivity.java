@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private DataReceiver dataReceiver;
     private int t = 0;
     private Intent intent;
+    private boolean isShowChart = false;
 
     BluetoothUtils btUtils;
 
@@ -119,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
         issueTime = findViewById(R.id.issueTime);
         btState = findViewById(R.id.btState);
         dbChart = findViewById(R.id.dbChart);
-        setChartLineView();
+        if(!isShowChart)dbChart.setVisibility(View.INVISIBLE);
+        if(isShowChart)setChartLineView();
 
         mediaPlayer = new MediaPlayer();
         btReceiver = new BluetoothReceiver();
@@ -139,16 +141,17 @@ public class MainActivity extends AppCompatActivity {
                 switch (msg.what) {
                     case Constant.MESSAGE_DB:
                         String DB = msg.obj.toString();
-                        Log.i(TAG,"DB:"+DB);
+                        //Log.i(TAG,"DB:"+DB);
                         tx.setText(DB+"");
-                        if ("-Infinity".equals( msg.obj.toString())) {
-                            degree=0f;
-                        }else {
-                            degree =(Float.parseFloat( msg.obj.toString()));
+                        if(isShowChart) {
+                            if ("-Infinity".equals(msg.obj.toString())) {
+                                degree = 0f;
+                            } else {
+                                degree = (Float.parseFloat(msg.obj.toString()));
+                            }
+                            mService.updateChart(t, degree); //update chart
+                            t += 1;
                         }
-                        //mService.updateChart(t, degree); //update chart
-                        t+=1;
-                        Log.i("updateChart:", "degree:"+msg.obj.toString()+" t:"+t);
                         break;
                      case Constant.MESSAGE_ISSILENT:
                          //Vibrate, alert, toast, bugreport
@@ -214,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, e.getMessage());
                     }
                     //handler.postDelayed(task, 1000);
-                    Log.i(TAG, "isRecord"+isRecord + "");
+                    Log.i(TAG, "isRecord: "+isRecord );
                     if (isRecord) {
                         btStart.setText("Listening, click to stop");
                         //tool.startGetNoise();

@@ -57,7 +57,7 @@ public class SilentTools {
 
     public boolean isSilent(double volume)
     {
-        if(volume < mSilentDB){
+        if(volume < mSilentDB && !"-Infinity".equals(volume+"")){
             return true;
         }else{
             return false;
@@ -104,7 +104,6 @@ public class SilentTools {
                 while (isGetVoiceRun) {
                     //r是实际读取的数据长度，一般而言r会小于buffersize
                     int r = mAudioRecord.read(buffer, 0, BUFFER_SIZE);
-                    Log.i(TAG,"r:"+r);
                     long v = 0;
                     // 将 buffer 内容取出，进行平方和运算
                     for (int i = 0; i < buffer.length; i++) {
