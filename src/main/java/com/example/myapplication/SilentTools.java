@@ -38,11 +38,12 @@ public class SilentTools {
     private Messenger myHandler;
     AudioManager musicManager;
 
+
     public void setMyHandler(Messenger handle){
         myHandler = handle;
     }
 
-    public SilentTools(Messenger handle, Context context) {
+    public SilentTools(Messenger handle, Context context, AudioRecord audioRecord) {
         mLock = new Object();
         mVolume = -1;
         mSilentDB = 50;
@@ -50,6 +51,7 @@ public class SilentTools {
         myHandler = handle;
         mContext = context;
         musicManager =(AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
+        mAudioRecord = audioRecord;
         resetTime();
     }
 
@@ -89,9 +91,6 @@ public class SilentTools {
             Log.e(TAG, "isGetVocieRun:"+isGetVoiceRun);
             return;
         }
-        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                SAMPLE_RATE_IN_HZ, AudioFormat.CHANNEL_IN_DEFAULT,
-                AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
         if (mAudioRecord == null) {
             Log.e("sound", "mAudioRecord failed to init");
         }
@@ -100,11 +99,12 @@ public class SilentTools {
         mThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                mAudioRecord.startRecording();
+                //mAudioRecord.startRecording();
                 short[] buffer = new short[BUFFER_SIZE];
                 while (isGetVoiceRun) {
                     //r是实际读取的数据长度，一般而言r会小于buffersize
                     int r = mAudioRecord.read(buffer, 0, BUFFER_SIZE);
+                    Log.i(TAG,"r:"+r);
                     long v = 0;
                     // 将 buffer 内容取出，进行平方和运算
                     for (int i = 0; i < buffer.length; i++) {

@@ -79,6 +79,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        //Click notification to resume
+        Log.i(TAG,"onResume");
+        if(isStart){
+            btStart.setText("Stop Listening");
+        }else if(isStart&&isRecord) {
+            btStart.setText("Listening, click to stop");
+        }else{
+            btStart.setText("START Listening");
+        }
         super.onResume();
 
     }
@@ -142,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                          Toast.makeText(getApplicationContext(), "Silent Issue!!! Stop Listen", Toast.LENGTH_LONG).show();
                          MyUtils.startBug2go("silent issue",thisActivity);
                          //tool.stopGetVoice();
-                         btStart.setText("START Listen");
+                         btStart.setText("START Listening");
                          isStart = false;
                     default:
                         break;
@@ -181,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //btStart
                 if(!isStart) {
-                    btStart.setText("STOP Listen");
+                    btStart.setText("Stop Listening");
                     isStart = true;
                     String silentDBText = silentDB.getText() + "";
                     String issueTimeText = issueTime.getText() + "";
@@ -200,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
                     //handler.postDelayed(task, 1000);
                     Log.i(TAG, "isRecord"+isRecord + "");
                     if (isRecord) {
-                        btStart.setText("Listening, click to STOP");
+                        btStart.setText("Listening, click to stop");
                         //tool.startGetNoise();
                         intent = new Intent(thisActivity, NotificationService.class);
                         intent.putExtra(Constant.INTENT_EXTRA_ISSUE_TIME,issueTime);
@@ -212,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }//btStop
                 else{
-                    btStart.setText("START Listen");
+                    btStart.setText("Start Listening");
                     isStart = false;
                     stopService(intent);
                     //tool.stopGetVoice();
