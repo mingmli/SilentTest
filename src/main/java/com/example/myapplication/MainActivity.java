@@ -39,6 +39,9 @@ import java.io.IOException;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
+    
+    private BluetoothConnectionEventManager mBtConnectionManager;
+    
     TextView tx;
     //SilentTools tool;
     EditText silentDB;
@@ -96,6 +99,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        mBtConnectionManager = new BluetoothConnectionEventManager(getApplicationContext());
+        mBtConnectionManager.registerEvents();
+        
         thisActivity = MainActivity.this;
         tx = findViewById(R.id.btsm);
         btStart = findViewById(R.id.btnStart);
@@ -260,6 +267,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        mBtConnectionManager.cleanup();
+
         mediaPlayer.release();
         preMP.release();
         //tool.stopGetVoice();
