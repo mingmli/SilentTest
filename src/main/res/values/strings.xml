@@ -1,0 +1,9 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">Silent</string>
+    <string name="bt_sm">There isn\'t enough space on the SD card to save the file from \u0022<xliff:g id="sender">%1$s</xliff:g>\u0022</string>
+    <string name="start">Start Listening</string>
+    <string name="stop">Stop</string>
+    <string name="hint_silent_db">silent DB, digital only, default 50db</string>
+    <string name="hint_issue_time">please enter issue time, default 10000ms</string>
+    <string name="bt_state">BT Connection state：</string>
+</resources>
