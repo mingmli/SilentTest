@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         btCheck = findViewById(R.id.btnCheckBTStatus);
         btUpdate = findViewById(R.id.btChart);
         dbChart = findViewById(R.id.dbChart);
-        if(!isShowChart)dbChart.setVisibility(View.INVISIBLE);
+        dbChart.setVisibility(View.INVISIBLE);
         if(isShowChart)setChartLineView();
 
         mediaPlayer = new MediaPlayer();
@@ -237,6 +237,8 @@ public class MainActivity extends AppCompatActivity {
                 //在开始监听DB得状态下绘制
                 if(isStart) {
                     if (!isUpdateChart) {
+                        if(dbChart.getVisibility()==View.INVISIBLE)
+                            dbChart.setVisibility(View.VISIBLE);
                         btUpdate.setText("Stop updating chart");
                         isUpdateChart = true;
                         mService.clearChart();
