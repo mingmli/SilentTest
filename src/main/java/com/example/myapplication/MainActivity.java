@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     EditText silentDB;
     EditText issueTime;
     Button btStart;
+    private Button btCheck;
     Boolean isRecord = false;
     private final Handler handler = new Handler();
     private static final String TAG="MainActivity";
@@ -58,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String BUG2OG_INTENT_BUGREPORT_START = "motorola.intent.action.BUG2GO.BUGREPORT.START";
     private static final String WIFI_DISCONNECT_BUG2GO = "WIFI_CLASS_D_DIAGNOSTICS" ;
     public static final String BUG2GO_AUTO_UPLOAD_EVENT_START = "bug2go_attach_start";
-    boolean isStart = false;
+    boolean isStart = false;//If start Listening
+    boolean isCheck = false;//If start checking bt status
     private Handler DBhandler;
     private FbChartline mService;
     private float degree = 0.0f;
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         
         mBtConnectionManager = new BluetoothConnectionEventManager(getApplicationContext());
-        mBtConnectionManager.registerEvents();
+        //mBtConnectionManager.registerEvents();
         
         thisActivity = MainActivity.this;
         tx = findViewById(R.id.btsm);
@@ -119,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
         silentDB = findViewById(R.id.silentDB);
         issueTime = findViewById(R.id.issueTime);
         btState = findViewById(R.id.btState);
+        btCheck = findViewById(R.id.btnCheckBTStatus);
         dbChart = findViewById(R.id.dbChart);
         if(!isShowChart)dbChart.setVisibility(View.INVISIBLE);
         if(isShowChart)setChartLineView();
@@ -132,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(btReceiver, intentFilter);
 
         DBhandler=new Handler(){
@@ -197,6 +201,22 @@ public class MainActivity extends AppCompatActivity {
             isRecord = true;
         }
         //tool = new SilentTools(DBhandler,thisActivity);
+
+        btCheck.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                if(!isCheck){
+                    btCheck.setText("Stop checking BT status");
+                    isCheck = true;
+                    mBtConnectionManager.registerEvents();
+                }else {
+                    btCheck.setText("Start checking BT status");
+                    isCheck = false;
+                    mBtConnectionManager.cleanup();
+                }
+            }
+        });
 
         btStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -305,6 +325,14 @@ public class MainActivity extends AppCompatActivity {
                     btState.setTextColor(Color.RED);
                     Toast.makeText(context,"Device disconnected",Toast.LENGTH_SHORT).show();
                     break;
+                case BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED:
+                    int btOnOffState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.STATE_OFF);
+                    if(btOnOffState == BluetoothAdapter.STATE_OFF){
+                        btState.setText("BT OFF, disconnected");
+                    }else if(btOnOffState == BluetoothAdapter.STATE_ON){
+                        btState.setText("BT ON");
+                    }
+
             }
         }
     }

@@ -29,20 +29,21 @@ public class BluetoothConnectionEventManager {
 
     private Handler mHandler = null;
     private long mLastGenerateTimestamp;
+    IntentFilter mFilter;
 
     private Context mContext;
 
     public BluetoothConnectionEventManager(Context context) {
         mContext = context;
+        mHandler = new BluetoothConnectionStateHandler(Looper.getMainLooper());
+        mFilter = new IntentFilter();
+        mFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        mFilter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+        mFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
     }
 
     public void registerEvents(){
-        mHandler = new BluetoothConnectionStateHandler(Looper.getMainLooper());
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        filter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
-        filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
-        mContext.registerReceiver(mReceiver, filter);
+        mContext.registerReceiver(mReceiver, mFilter);
     }
 
     // Broadcast receiver for all changes

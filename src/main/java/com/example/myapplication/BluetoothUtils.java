@@ -14,19 +14,19 @@ public class BluetoothUtils {
         HFP = -1;
     }
 
-    public boolean getBTstate() {
+    public boolean isBTEnabled() {
         return btAdapter.isEnabled();
     }
 
     public int getA2DPState(){
-        if(getBTstate()) {
+        if(isBTEnabled()) {
             A2DP = btAdapter.getProfileConnectionState(BluetoothProfile.A2DP);
         }
        return A2DP;
     }
 
     public int getHFPState(){
-        if(getBTstate()) {
+        if(isBTEnabled()) {
             HFP = btAdapter.getProfileConnectionState(BluetoothProfile.HEADSET);
         }
         return HFP;

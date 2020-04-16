@@ -6,4 +6,5 @@
     <string name="hint_silent_db">silent DB, digital only, default 50db</string>
     <string name="hint_issue_time">please enter issue time, default 10000ms</string>
     <string name="bt_state">BT Connection state：</string>
+    <string name="bt_check_status">Start checking BT status</string>
 </resources>

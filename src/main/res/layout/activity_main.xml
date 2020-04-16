@@ -49,6 +49,16 @@
         android:layout_height="wrap_content"
         android:hint="@string/hint_issue_time"
         android:digits="0123456789"/>
+    <Button
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:id="@+id/btnCheckBTStatus"
+        android:text="@string/bt_check_status"
+        android:textSize="22sp"
+        />
     <TextView
         android:layout_marginTop="30dp"
         android:textSize="22sp"
