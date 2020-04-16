@@ -133,6 +133,13 @@ public class FbChartline {
 //		mGraphicalView.repaint();//此处也可以调用invalidate()
 //	}
 
+	public void clearChart(){
+		//mGraphicalView.repaint();
+		multipleSeriesDataset.removeSeries(mSeries);
+		mSeries.clear();
+		mGraphicalView.repaint();
+	}
+
 	/**
 	 * 添加新的数据，多组，更新曲线，只能运行在主线程
 	 * @param xList

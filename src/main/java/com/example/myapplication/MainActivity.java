@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     EditText issueTime;
     Button btStart;
     private Button btCheck;
+    private Button btUpdate;
     Boolean isRecord = false;
     private final Handler handler = new Handler();
     private static final String TAG="MainActivity";
@@ -61,15 +62,17 @@ public class MainActivity extends AppCompatActivity {
     public static final String BUG2GO_AUTO_UPLOAD_EVENT_START = "bug2go_attach_start";
     boolean isStart = false;//If start Listening
     boolean isCheck = false;//If start checking bt status
+    boolean isUpdate = false; //If start updating chart
     private Handler DBhandler;
     private FbChartline mService;
     private float degree = 0.0f;
     private GraphicalView mView;
     private LinearLayout dbChart;
     private DataReceiver dataReceiver;
-    private int t = 0;
+    private long t = 0;
     private Intent intent;
-    private boolean isShowChart = false;
+    private boolean isShowChart = true;
+    private boolean isUpdateChart = false;
 
     BluetoothUtils btUtils;
 
@@ -122,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
         issueTime = findViewById(R.id.issueTime);
         btState = findViewById(R.id.btState);
         btCheck = findViewById(R.id.btnCheckBTStatus);
+        btUpdate = findViewById(R.id.btChart);
         dbChart = findViewById(R.id.dbChart);
         if(!isShowChart)dbChart.setVisibility(View.INVISIBLE);
         if(isShowChart)setChartLineView();
@@ -147,14 +151,23 @@ public class MainActivity extends AppCompatActivity {
                         String DB = msg.obj.toString();
                         //Log.i(TAG,"DB:"+DB);
                         tx.setText(DB+"");
-                        if(isShowChart) {
+                        if(isShowChart && isUpdateChart) {
                             if ("-Infinity".equals(msg.obj.toString())) {
                                 degree = 0f;
                             } else {
                                 degree = (Float.parseFloat(msg.obj.toString()));
                             }
-                            mService.updateChart(t, degree); //update chart
-                            t += 1;
+                             //update chart
+                            if(t==0){
+                                mService.updateChart(0, degree);
+                                t = System.currentTimeMillis();
+                            }else {
+                                long currentTime = System.currentTimeMillis();
+                                int time = (int)( (currentTime - t)/1000);
+                                //t = currentTime;
+                                Log.i(TAG,"time:"+time);
+                                mService.updateChart(time, degree);
+                            }
                         }
                         break;
                      case Constant.MESSAGE_ISSILENT:
@@ -214,6 +227,26 @@ public class MainActivity extends AppCompatActivity {
                     btCheck.setText("Start checking BT status");
                     isCheck = false;
                     mBtConnectionManager.cleanup();
+                }
+            }
+        });
+        btUpdate.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                //在开始监听DB得状态下绘制
+                if(isStart) {
+                    if (!isUpdateChart) {
+                        btUpdate.setText("Stop updating chart");
+                        isUpdateChart = true;
+                        mService.clearChart();
+                        t = 0;
+                    } else {
+                        btUpdate.setText("Start updating chart");
+                        isUpdateChart = false;
+                    }
+                }else{
+                    Toast.makeText(thisActivity,"Please start listening first", Toast.LENGTH_SHORT).show();
                 }
             }
         });
