@@ -17,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Handler;
@@ -41,13 +42,15 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
     
     private BluetoothConnectionEventManager mBtConnectionManager;
+    private WifiConnectionEventManager mWifiConnectionManager;
     
     TextView tx;
     //SilentTools tool;
     EditText silentDB;
     EditText issueTime;
     Button btStart;
-    private Button btCheck;
+    private Button btCheckBT;
+    private Button btCheckWifi;
     private Button btUpdate;
     Boolean isRecord = false;
     private final Handler handler = new Handler();
@@ -62,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String BUG2GO_AUTO_UPLOAD_EVENT_START = "bug2go_attach_start";
     boolean isStart = false;//If start Listening
     boolean isCheck = false;//If start checking bt status
+    boolean isCheckWifi = false;
     boolean isUpdate = false; //If start updating chart
     private Handler DBhandler;
     private FbChartline mService;
@@ -117,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
         
         mBtConnectionManager = new BluetoothConnectionEventManager(getApplicationContext());
         //mBtConnectionManager.registerEvents();
+        mWifiConnectionManager = new WifiConnectionEventManager(getApplicationContext());
+
         
         thisActivity = MainActivity.this;
         tx = findViewById(R.id.btsm);
@@ -124,7 +130,8 @@ public class MainActivity extends AppCompatActivity {
         silentDB = findViewById(R.id.silentDB);
         issueTime = findViewById(R.id.issueTime);
         btState = findViewById(R.id.btState);
-        btCheck = findViewById(R.id.btnCheckBTStatus);
+        btCheckBT = findViewById(R.id.btnCheckBTStatus);
+        btCheckWifi = findViewById(R.id.btnCheckWifiStatus);
         btUpdate = findViewById(R.id.btChart);
         dbChart = findViewById(R.id.dbChart);
         dbChart.setVisibility(View.INVISIBLE);
@@ -141,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(btReceiver, intentFilter);
+
+
 
         DBhandler=new Handler(){
 
@@ -215,21 +224,37 @@ public class MainActivity extends AppCompatActivity {
         }
         //tool = new SilentTools(DBhandler,thisActivity);
 
-        btCheck.setOnClickListener(new View.OnClickListener(){
+        btCheckBT.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
                 if(!isCheck){
-                    btCheck.setText("Stop checking BT status");
+                    btCheckBT.setText("Stop checking BT status");
                     isCheck = true;
                     mBtConnectionManager.registerEvents();
                 }else {
-                    btCheck.setText("Start checking BT status");
+                    btCheckBT.setText("Start checking BT status");
                     isCheck = false;
                     mBtConnectionManager.cleanup();
                 }
             }
         });
+        btCheckWifi.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                if(!isCheckWifi){
+                    btCheckWifi.setText("Stop checking Wifi status");
+                    isCheckWifi = true;
+                    mWifiConnectionManager.registerEvents();
+                }else {
+                    btCheckWifi.setText("Start checking Wifi status");
+                    isCheckWifi = false;
+                    mWifiConnectionManager.cleanup();
+                }
+            }
+        });
+
         btUpdate.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -339,6 +364,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
         mBtConnectionManager.cleanup();
+        mWifiConnectionManager.cleanup();
 
         mediaPlayer.release();
         preMP.release();

@@ -56,7 +56,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:id="@+id/btnCheckBTStatus"
-        android:text="@string/bt_check_status"
+        android:text="@string/bt_check_bt_status"
         android:textSize="22sp"
         />
     <TextView
@@ -73,6 +73,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />
+    <Button
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:id="@+id/btnCheckWifiStatus"
+        android:text="@string/bt_check_wifi_status"
+        android:textSize="22sp"
+     />
     <Button
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
