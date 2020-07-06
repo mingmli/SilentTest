@@ -1,6 +1,5 @@
-package com.example.myapplication;
+package com.example.myapplication.bluetooth;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,8 +12,11 @@ import android.os.IBinder;
 import android.os.Messenger;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+
+import com.example.myapplication.Constant;
+import com.example.myapplication.R;
+import com.example.myapplication.StartActivity;
 
 public class NotificationService extends Service {
     private static final String TAG = "Silent_Noti";
@@ -66,7 +68,9 @@ public class NotificationService extends Service {
         showNotification("listening...");
     }
     private void showNotification(String db){
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(this, StartActivity.class);
+        intent.putExtra("message",  0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationChannel mChannel = new NotificationChannel("mychannel","mychannel", NotificationManager.IMPORTANCE_HIGH);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"mychannel").setContentTitle("SilentAPP").setContentText(db)
                 .setSmallIcon(R.drawable.ic_launcher_background).setContentIntent(pendingIntent);

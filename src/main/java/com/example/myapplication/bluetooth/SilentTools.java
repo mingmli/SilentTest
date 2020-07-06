@@ -1,20 +1,15 @@
-package com.example.myapplication;
+package com.example.myapplication.bluetooth;
 
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
-import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
-import android.widget.TextView;
 
-import java.net.ConnectException;
-import java.security.MessageDigest;
-import java.util.logging.LogRecord;
+import com.example.myapplication.Constant;
 
 public class SilentTools {
 

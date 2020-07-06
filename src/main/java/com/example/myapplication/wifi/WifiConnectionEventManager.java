@@ -1,27 +1,18 @@
-package com.example.myapplication;
+package com.example.myapplication.wifi;
 
-import android.bluetooth.BluetoothA2dp;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.DropBoxManager;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
+import com.example.myapplication.MyUtils;
 
-import java.util.Date;
-
-public class WifiConnectionEventManager  {
+public class WifiConnectionEventManager {
     private static final String TAG = "Silent_WifiConnectionEventManager";
 
     private Handler mHandler = null;
@@ -73,6 +64,10 @@ public class WifiConnectionEventManager  {
 
 
     public void cleanup(){
-        mContext.unregisterReceiver(mReceiver);
+        try {
+            mContext.unregisterReceiver(mReceiver);
+        }catch (IllegalArgumentException e){
+            Log.e(TAG, "clean up alredy have been done before");
+        }
     }
 }

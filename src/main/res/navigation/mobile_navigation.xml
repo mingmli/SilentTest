@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_bt_state">
+
+    <fragment
+        android:id="@+id/nav_bt_state"
+        android:name="com.example.myapplication.bluetooth.BluetoothStateFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fargment_bt_state">
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_bt_battery"
+        android:name="com.example.myapplication.bluetooth.BTBatteryFragment"
+        android:label="@string/menu_bt_battery"
+        tools:layout="@layout/fragment_bt_battery">
+
+        <!--<action
+            android:id="@+id/action_HomeFragment_to_HomeSecondFragment"
+            app:destination="@id/nav_home_second" />-->
+    </fragment>
+    <!--<fragment
+        android:id="@+id/nav_home_second"
+        android:name="com.example.myapplication.ui.home.HomeSecondFragment"
+        android:label="@string/home_second"
+        tools:layout="@layout/fragment_home_second">
+        <action
+            android:id="@+id/action_HomeSecondFragment_to_HomeFragment"
+            app:destination="@id/nav_bt_state" />
+
+        <argument
+            android:name="myArg"
+            app:argType="string" />
+    </fragment>-->
+
+
+    <fragment
+        android:id="@+id/nav_wifi_state"
+        android:name="com.example.myapplication.wifi.WifiStateFragment"
+        android:label="@string/menu_wifi_state"
+        tools:layout="@layout/fragment_wifi" />
+</navigation>

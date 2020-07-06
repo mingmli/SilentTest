@@ -1,8 +1,4 @@
-package com.example.myapplication;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+package com.example.myapplication.bluetooth;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -14,19 +10,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -34,38 +28,38 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
+import com.example.myapplication.Constant;
+import com.example.myapplication.FbChartline;
+import com.example.myapplication.MyUtils;
+import com.example.myapplication.R;
+
 import org.achartengine.GraphicalView;
 
-import java.io.IOException;
-import java.util.Date;
+public class BluetoothStateFragment extends Fragment {
 
-public class MainActivity extends AppCompatActivity {
-    
     private BluetoothConnectionEventManager mBtConnectionManager;
-    private WifiConnectionEventManager mWifiConnectionManager;
-    
+
     TextView tx;
     //SilentTools tool;
     EditText silentDB;
     EditText issueTime;
     Button btStart;
     private Button btCheckBT;
-    private Button btCheckWifi;
     private Button btUpdate;
     Boolean isRecord = false;
     private final Handler handler = new Handler();
     private static final String TAG="MainActivity";
     Activity thisActivity;
-    MediaPlayer mediaPlayer;
-    MediaPlayer preMP;
     BluetoothReceiver btReceiver;
     TextView btState;
     public static final String BUG2OG_INTENT_BUGREPORT_START = "motorola.intent.action.BUG2GO.BUGREPORT.START";
-    private static final String WIFI_DISCONNECT_BUG2GO = "WIFI_CLASS_D_DIAGNOSTICS" ;
     public static final String BUG2GO_AUTO_UPLOAD_EVENT_START = "bug2go_attach_start";
     boolean isStart = false;//If start Listening
     boolean isCheck = false;//If start checking bt status
-    boolean isCheckWifi = false;
     boolean isUpdate = false; //If start updating chart
     private Handler DBhandler;
     private FbChartline mService;
@@ -81,17 +75,17 @@ public class MainActivity extends AppCompatActivity {
     BluetoothUtils btUtils;
 
     @Override
-    protected void onStart()
+    public void onStart()
     {
         dataReceiver = new DataReceiver();
         IntentFilter filter = new IntentFilter();// 创建IntentFilter对象
         filter.addAction("com.example.myapplication.service");
-        registerReceiver(dataReceiver, filter);// 注册Broadcast Receiver
+        thisActivity.registerReceiver(dataReceiver, filter);// 注册Broadcast Receiver
         super.onStart();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         //Click notification to resume
         Log.i(TAG,"onResume");
         if(isStart){
@@ -115,29 +109,24 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        
-        mBtConnectionManager = new BluetoothConnectionEventManager(getApplicationContext());
+        View root = inflater.inflate(R.layout.fargment_bt_state, container, false);
+        thisActivity = getActivity();
+        mBtConnectionManager = new BluetoothConnectionEventManager(thisActivity);
         //mBtConnectionManager.registerEvents();
-        mWifiConnectionManager = new WifiConnectionEventManager(getApplicationContext());
-
-        
-        thisActivity = MainActivity.this;
-        tx = findViewById(R.id.btsm);
-        btStart = findViewById(R.id.btnStart);
-        silentDB = findViewById(R.id.silentDB);
-        issueTime = findViewById(R.id.issueTime);
-        btState = findViewById(R.id.btState);
-        btCheckBT = findViewById(R.id.btnCheckBTStatus);
-        btCheckWifi = findViewById(R.id.btnCheckWifiStatus);
-        btUpdate = findViewById(R.id.btChart);
-        dbChart = findViewById(R.id.dbChart);
+        tx = root.findViewById(R.id.btsm);
+        btStart = root.findViewById(R.id.btnStart);
+        silentDB = root.findViewById(R.id.silentDB);
+        issueTime = root.findViewById(R.id.issueTime);
+        btState = root.findViewById(R.id.btState);
+        btCheckBT = root.findViewById(R.id.btnCheckBTStatus);
+        btUpdate = root.findViewById(R.id.btChart);
+        dbChart = root.findViewById(R.id.dbChart);
         dbChart.setVisibility(View.INVISIBLE);
         if(isShowChart)setChartLineView();
 
-        mediaPlayer = new MediaPlayer();
         btReceiver = new BluetoothReceiver();
         btUtils = new BluetoothUtils();
 
@@ -147,14 +136,14 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(btReceiver, intentFilter);
+        thisActivity.registerReceiver(btReceiver, intentFilter);
 
 
 
         DBhandler=new Handler(){
 
             @SuppressLint("HandlerLeak")
-            public void handleMessage(android.os.Message msg) {
+            public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case Constant.MESSAGE_DB:
                         String DB = msg.obj.toString();
@@ -186,10 +175,10 @@ public class MainActivity extends AppCompatActivity {
                              Vibrator vibrator = (Vibrator)thisActivity.getSystemService(thisActivity.VIBRATOR_SERVICE);
                              vibrator.vibrate(VibrationEffect.createOneShot(200,255));
                              //startAlert();
-                             Toast.makeText(getApplicationContext(), "Silent Issue!!! Stop Listen", Toast.LENGTH_LONG).show();
+                             Toast.makeText(thisActivity, "Silent Issue!!! Stop Listen", Toast.LENGTH_LONG).show();
                              MyUtils.startBug2go("silent issue",thisActivity);
                              btStart.setText("RESTART Listening");
-                             stopService(intent);
+                             thisActivity.stopService(intent);
                          }
                          isStart = false;
                     default:
@@ -197,20 +186,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-
-        try {
-            AssetFileDescriptor fd = getAssets().openFd("alert.mp3");
-            mediaPlayer.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(),fd.getLength());
-            mediaPlayer.prepareAsync();
-        } catch (IOException e) {
-            Log.e(TAG,e.getMessage());
-        }
-        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                preMP = mp;
-            }
-        });
 
         if (ContextCompat.checkSelfPermission(thisActivity,
                 Manifest.permission.RECORD_AUDIO)
@@ -236,21 +211,6 @@ public class MainActivity extends AppCompatActivity {
                     btCheckBT.setText("Start checking BT status");
                     isCheck = false;
                     mBtConnectionManager.cleanup();
-                }
-            }
-        });
-        btCheckWifi.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                if(!isCheckWifi){
-                    btCheckWifi.setText("Stop checking Wifi status");
-                    isCheckWifi = true;
-                    mWifiConnectionManager.registerEvents();
-                }else {
-                    btCheckWifi.setText("Start checking Wifi status");
-                    isCheckWifi = false;
-                    mWifiConnectionManager.cleanup();
                 }
             }
         });
@@ -308,24 +268,20 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra(Constant.INTENT_EXTRA_ISSUE_TIME,issueTime);
                         intent.putExtra(Constant.INTENT_EXTRA_SILENT_DB,silentDB);
                         intent.putExtra("messenger", new Messenger(DBhandler));
-                        startService(intent);
+                        thisActivity.startService(intent);
                     }else{
-                        Toast.makeText(getApplicationContext(), "Record Permission Denied!!!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(thisActivity, "Record Permission Denied!!!", Toast.LENGTH_SHORT).show();
                     }
                 }//btStop
                 else{
                     btStart.setText("Start Listening");
                     isStart = false;
-                    stopService(intent);
+                    thisActivity.stopService(intent);
                     //tool.stopGetVoice();
                 }
             }
         });
-
-    }
-
-    private void startAlert(){
-        preMP.start();
+        return root;
     }
 
     private void setChartLineView() {
@@ -351,8 +307,8 @@ public class MainActivity extends AppCompatActivity {
 
                 } else {
                     Log.d("MainActivity", "permission denied by user");
-                    Toast.makeText(getApplicationContext(), "Exit with Permission Denied!!!", Toast.LENGTH_LONG).show();
-                    finish();
+                    Toast.makeText(thisActivity, "Exit with Permission Denied!!!", Toast.LENGTH_LONG).show();
+                    thisActivity.finish();
                 }
                 return;
             }
@@ -364,12 +320,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
         mBtConnectionManager.cleanup();
-        mWifiConnectionManager.cleanup();
-
-        mediaPlayer.release();
-        preMP.release();
         //tool.stopGetVoice();
-        unregisterReceiver(btReceiver);
+        thisActivity.unregisterReceiver(btReceiver);
     }
 
     private class BluetoothReceiver extends BroadcastReceiver {
