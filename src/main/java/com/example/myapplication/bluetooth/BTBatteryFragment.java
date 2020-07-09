@@ -40,6 +40,13 @@ public class BTBatteryFragment extends Fragment {
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1234);
         }
+        if (ContextCompat.checkSelfPermission(thisActivity, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    1234);
+        }
     }
     @Override
     public void onRequestPermissionsResult(int requestCode,

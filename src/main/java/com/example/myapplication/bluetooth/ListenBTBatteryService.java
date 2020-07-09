@@ -6,7 +6,7 @@ import android.os.IBinder;
 
 public class ListenBTBatteryService extends Service {
     private BTBatteryLevelManager bblManager;
-    private static final String BTAddress = "4C:3D:6F:5A:89:2D";
+    private static final String BTAddress = "4C:3D:6F";
     @Override
     public IBinder onBind(Intent intent) {
         return null;

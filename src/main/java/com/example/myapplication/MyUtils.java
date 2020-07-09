@@ -6,6 +6,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.net.ConnectException;
 import java.util.Date;
@@ -39,28 +40,39 @@ public class MyUtils {
         Log.d(TAG, "Added Drop box entry - " + evtType + " " + value );
     }
 
-    //文件写入
-    public static void writeFileData(String filename, String content){
+    //Write
+    public static void writeFileData(String filename, String content, boolean isAppend){
         try {
-            FileOutputStream fos = new FileOutputStream(filename,true);//获得FileOutputStream
+            FileOutputStream fos = new FileOutputStream(filename,isAppend);
             fos.write(content.getBytes());
             fos.write("\r\n".getBytes());
-            fos.close();//关闭文件输出流
+            fos.close();
         } catch (Exception e) {
             Log.i(TAG,e.getMessage());
         }
     }
 
-    //文件读取
+    public static int getFileSize(String fileName) {
+        int size = -1;
+        try {
+            FileInputStream f = new FileInputStream(fileName);
+            //Log.i("Silent",f.available()+"");
+            size = f.available()/1024/1024/1024;//G
+        }catch (Exception e) {
+            Log.i(TAG,e.getMessage());
+        }
+        return size;
+    }
+
+    //READ
     public static String readFileData(String fileName){
         String result="";
         try{
             FileInputStream fis = new FileInputStream(fileName);
-            //获取文件长度
+            //getLength
             int lenght = fis.available();
             byte[] buffer = new byte[lenght];
             fis.read(buffer);
-            //将byte数组转换成指定格式的字符串
             result = new String(buffer, "UTF-8");
 
         } catch (Exception e) {

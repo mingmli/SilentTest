@@ -80,7 +80,7 @@ public class BTBatteryLevelManager {
                 Set<BluetoothDevice> devices = btAdapter.getBondedDevices();
                 for (BluetoothDevice device : devices) {
                     String deviceAd = device.getAddress();
-                    if(!address.equals(deviceAd)) continue;
+                    if(!(address.equals(deviceAd.substring(0,8)))) continue;
                     Method batteryMethod = BluetoothDevice.class.getDeclaredMethod("getBatteryLevel", (Class[]) null);
                     batteryMethod.setAccessible(true);
                     Method isConnectedMethod = BluetoothDevice.class.getDeclaredMethod("isConnected", (Class[]) null);
@@ -89,20 +89,26 @@ public class BTBatteryLevelManager {
                     level = (int) batteryMethod.invoke(device, (Object[]) null);
                     if (device != null && level > 0 && isConnected) {
                         String deviceName = device .getName();
-                        Log.d(TAG, deviceName + "    Battery:  " + level);
+                        //Log.d(TAG, deviceName + "    Battery:  " + level);
                         //Write it to SDCARD /storage/emulated/0
                         String tmp = "time:"+new Date(System.currentTimeMillis())+" battery:"+level;
-                        MyUtils.writeFileData(path,tmp);
+                        Log.i(TAG,"path size:"+MyUtils.getFileSize(path));
+                        if(MyUtils.getFileSize(path)>0){
+                            Log.i(TAG,"append false");
+                            MyUtils.writeFileData(path,tmp,false);
+                        }else{
+                            MyUtils.writeFileData(path,tmp,true);
+                        }
                     }else if(!isConnected){
                         //disconnected
                         String tmp = "time:"+new Date(System.currentTimeMillis())+" Disconnected";
-                        MyUtils.writeFileData(path,tmp);
+                        MyUtils.writeFileData(path,tmp,true);
                     }
                 }
             } else {
                 //No connected device, stop
                 String tmp = "time:"+new Date(System.currentTimeMillis())+" Disconnected";
-                MyUtils.writeFileData(path,tmp);
+                MyUtils.writeFileData(path,tmp,true);
             }
         } catch (Exception e) {
             e.printStackTrace();
