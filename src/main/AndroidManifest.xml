@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -15,7 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:launchMode="singleTask"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:requestLegacyExternalStorage="true">
         <activity
             android:name=".StartActivity"
             android:label="@string/title_activity_start"
@@ -26,7 +29,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".NotificationService" />
+        <service android:name=".bluetooth.NotificationService" />
+        <service android:name=".wifi.ListenWifiStateService"/>
+        <service android:name=".bluetooth.ListenBTStateService"/>
+        <service android:name = ".bluetooth.ListenBTBatteryService"/>
     </application>
 
 </manifest>

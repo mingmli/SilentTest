@@ -2,13 +2,16 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 
+import com.example.myapplication.wifi.WifiStateFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -21,6 +24,8 @@ public class StartActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private NavController navController;
+    private WifiStateFragment mWifiFragment;
+    private String TAG = "Silent_StartActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +52,19 @@ public class StartActivity extends AppCompatActivity {
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-        checkIfGoBtStateFrag(getIntent());
+        checkIfGoBtStateFrag(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        checkIfGoBtStateFrag(intent);
+        if(intent!=null)
+            checkIfGoBtStateFrag(intent.getExtras());
     }
 
     @Override
@@ -70,12 +81,22 @@ public class StartActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
-    private void checkIfGoBtStateFrag(Intent intent){
-        int messageType = intent.getIntExtra("message",0);
+    private void checkIfGoBtStateFrag(Bundle bundle){
+        if(bundle == null) return;
+        int messageType = bundle.getInt("Type");
+
+        Log.i(TAG,"checkIfGoBtStateFra: messageType:"+messageType);
         switch (messageType){
             case 0:
-                navController.navigate(R.id.nav_bt_state);
-            break;
+                //navController.navigate(R.id.nav_bt_state);
+                break;
+            case 2:
+                //From notification
+                Boolean isCheckWifi = bundle.getBoolean("isCheckWifi",false);
+                Bundle b = new Bundle();
+                b.putBoolean("isCheckWifi",true);
+                //navController.navigate(R.id.nav_wifi_state, bundle);
+                break;
             default:
                 break;
         }

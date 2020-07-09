@@ -8,13 +8,16 @@ import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.navigation.NavDeepLinkBuilder;
 
 import com.example.myapplication.Constant;
+import com.example.myapplication.PrefStatusUtil;
 import com.example.myapplication.R;
 import com.example.myapplication.StartActivity;
 
@@ -45,7 +48,6 @@ public class NotificationService extends Service {
         issueTime = intent.getIntExtra(Constant.INTENT_EXTRA_ISSUE_TIME,10000);
         silentDB = intent.getIntExtra(Constant.INTENT_EXTRA_SILENT_DB,50);
         Log.i(TAG, "issueTime:"+issueTime+" silentDB:"+ silentDB);
-
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 SAMPLE_RATE_IN_HZ, AudioFormat.CHANNEL_IN_DEFAULT,
                 AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
@@ -65,12 +67,14 @@ public class NotificationService extends Service {
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        showNotification("listening...");
+
+        showNotification("listening BT DB...");
     }
     private void showNotification(String db){
-        Intent intent = new Intent(this, StartActivity.class);
-        intent.putExtra("message",  0);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        //PrefStatusUtil pf = new PrefStatusUtil(this);
+        //Bundle bundle = new Bundle();
+        //pf.getBooleanStatus("startDB");
+        PendingIntent pendingIntent = new NavDeepLinkBuilder(this).setComponentName(StartActivity.class).setGraph(R.navigation.mobile_navigation).setDestination(R.id.nav_bt_state).createPendingIntent();
         NotificationChannel mChannel = new NotificationChannel("mychannel","mychannel", NotificationManager.IMPORTANCE_HIGH);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"mychannel").setContentTitle("SilentAPP").setContentText(db)
                 .setSmallIcon(R.drawable.ic_launcher_background).setContentIntent(pendingIntent);

@@ -8,8 +8,10 @@
     <string name="bt_state">BT Connection state：</string>
     <string name="bt_check_bt_status">Start checking BT status</string>
     <string name="bt_check_wifi_status">Start checking Wifi status</string>
+    <string name="bt_check_bt_battery">Start checking BT Battery</string>
+
     <string name="start_chart">Start updating chart</string>
-    <string name="title_activity_start">StartActivity</string>
+    <string name="title_activity_start">QATool</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">QA tools</string>

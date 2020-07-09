@@ -143,7 +143,7 @@ public class BluetoothConnectionEventManager {
         try {
             mContext.unregisterReceiver(mReceiver);
         }catch (IllegalArgumentException e){
-            Log.e(TAG, "clean up alredy have been done before");
+            Log.e(TAG, "clean up already have been done before");
         }
     }
 }

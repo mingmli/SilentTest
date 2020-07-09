@@ -10,10 +10,11 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.example.myapplication.Constant;
+import com.example.myapplication.PrefStatusUtil;
 
 public class SilentTools {
 
-    private static final String TAG = "silent_Tools";
+    private static final String TAG = "Silent_Tools";
     static final int SAMPLE_RATE_IN_HZ = 8000;
     static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE_IN_HZ,
             AudioFormat.CHANNEL_IN_DEFAULT, AudioFormat.ENCODING_PCM_16BIT);
@@ -28,7 +29,7 @@ public class SilentTools {
     boolean isStartSilent;
     int mSilentDB;
     int mIssueTime;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private Context mContext;
     private Messenger myHandler;
     AudioManager musicManager;
@@ -167,6 +168,8 @@ public class SilentTools {
     public void stopGetVoice(){
         isGetVoiceRun = false;
         isStartSilent = false;
+        PrefStatusUtil pf = new PrefStatusUtil(mContext);
+        pf.putBooleanStatus("startDB", false);
         resetTime();
     }
 }
