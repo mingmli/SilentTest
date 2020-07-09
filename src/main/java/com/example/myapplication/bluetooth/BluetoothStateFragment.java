@@ -35,6 +35,7 @@ import androidx.fragment.app.Fragment;
 import com.example.myapplication.Constant;
 import com.example.myapplication.FbChartline;
 import com.example.myapplication.MyUtils;
+import com.example.myapplication.PrefStatusUtil;
 import com.example.myapplication.R;
 
 import org.achartengine.GraphicalView;
@@ -58,39 +59,31 @@ public class BluetoothStateFragment extends Fragment {
     TextView btState;
     public static final String BUG2OG_INTENT_BUGREPORT_START = "motorola.intent.action.BUG2GO.BUGREPORT.START";
     public static final String BUG2GO_AUTO_UPLOAD_EVENT_START = "bug2go_attach_start";
-    boolean isStart = false;//If start Listening
-    boolean isCheck = false;//If start checking bt status
+    boolean isStartBTDB = false;//If start Listening
+    boolean isCheckBTStatus = false;//If start checking bt status
     boolean isUpdate = false; //If start updating chart
     private Handler DBhandler;
     private FbChartline mService;
     private float degree = 0.0f;
     private GraphicalView mView;
     private LinearLayout dbChart;
-    private DataReceiver dataReceiver;
     private long t = 0;
-    private Intent intent;
+    private Intent BTDBIntent;
     private boolean isShowChart = true;
     private boolean isUpdateChart = false;
 
     BluetoothUtils btUtils;
+    PrefStatusUtil pf;
+    Intent btStatusNoIntent;
 
-    @Override
-    public void onStart()
-    {
-        dataReceiver = new DataReceiver();
-        IntentFilter filter = new IntentFilter();// 创建IntentFilter对象
-        filter.addAction("com.example.myapplication.service");
-        thisActivity.registerReceiver(dataReceiver, filter);// 注册Broadcast Receiver
-        super.onStart();
-    }
 
     @Override
     public void onResume() {
         //Click notification to resume
         Log.i(TAG,"onResume");
-        if(isStart){
+        if(isStartBTDB){
             btStart.setText("Stop Listening");
-        }else if(isStart&&isRecord) {
+        }else if(isStartBTDB&&isRecord) {
             btStart.setText("Listening, click to stop");
         }else{
             btStart.setText("START Listening");
@@ -99,21 +92,15 @@ public class BluetoothStateFragment extends Fragment {
 
     }
 
-    private class DataReceiver extends BroadcastReceiver{
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        Log.i(TAG,"onCreateView");
         super.onCreate(savedInstanceState);
         View root = inflater.inflate(R.layout.fargment_bt_state, container, false);
         thisActivity = getActivity();
+        pf = new PrefStatusUtil(thisActivity);
         mBtConnectionManager = new BluetoothConnectionEventManager(thisActivity);
         //mBtConnectionManager.registerEvents();
         tx = root.findViewById(R.id.btsm);
@@ -137,6 +124,9 @@ public class BluetoothStateFragment extends Fragment {
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         thisActivity.registerReceiver(btReceiver, intentFilter);
+
+        btStatusNoIntent = new Intent(thisActivity, ListenBTStateService.class);
+
 
 
 
@@ -171,16 +161,16 @@ public class BluetoothStateFragment extends Fragment {
                      case Constant.MESSAGE_ISSILENT:
                          //Vibrate, alert, toast, bugreport
                          //avoid triggered multiple timess
-                         if(isStart) {
+                         if(isStartBTDB) {
                              Vibrator vibrator = (Vibrator)thisActivity.getSystemService(thisActivity.VIBRATOR_SERVICE);
                              vibrator.vibrate(VibrationEffect.createOneShot(200,255));
                              //startAlert();
                              Toast.makeText(thisActivity, "Silent Issue!!! Stop Listen", Toast.LENGTH_LONG).show();
                              MyUtils.startBug2go("silent issue",thisActivity);
                              btStart.setText("RESTART Listening");
-                             thisActivity.stopService(intent);
+                             thisActivity.stopService(BTDBIntent);
                          }
-                         isStart = false;
+                         isStartBTDB = false;
                     default:
                         break;
                 }
@@ -198,29 +188,36 @@ public class BluetoothStateFragment extends Fragment {
             isRecord = true;
         }
         //tool = new SilentTools(DBhandler,thisActivity);
+        //Set button according to pf's value
+        isCheckBTStatus = pf.getBooleanStatus("BTStatus");
+        String tmp = isCheckBTStatus?"Stop checking BT status":"Start checking BT status";
+        btCheckBT.setText(tmp);
+
 
         btCheckBT.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                if(!isCheck){
+                if(!isCheckBTStatus){
                     btCheckBT.setText("Stop checking BT status");
-                    isCheck = true;
-                    mBtConnectionManager.registerEvents();
+                    isCheckBTStatus = true;
+                    thisActivity.startService(btStatusNoIntent);
                 }else {
                     btCheckBT.setText("Start checking BT status");
-                    isCheck = false;
-                    mBtConnectionManager.cleanup();
+                    isCheckBTStatus = false;
+                    thisActivity.stopService(btStatusNoIntent);
                 }
+                pf.putBooleanStatus("BTStatus",isCheckBTStatus);
             }
         });
+
 
         btUpdate.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
                 //在开始监听DB得状态下绘制
-                if(isStart) {
+                if(isStartBTDB) {
                     if (!isUpdateChart) {
                         if(dbChart.getVisibility()==View.INVISIBLE)
                             dbChart.setVisibility(View.VISIBLE);
@@ -237,14 +234,23 @@ public class BluetoothStateFragment extends Fragment {
                 }
             }
         });
+        isStartBTDB = pf.getBooleanStatus("startDB");
+        tmp= isStartBTDB?"Stop Listening":"Listening, click to stop";
+        btStart.setText(tmp);
+
+        BTDBIntent = new Intent(thisActivity, NotificationService.class);
+//        if(isStartBTDB&&isRecord){
+//            BTDBIntent.putExtra("messenger", new Messenger(DBhandler));
+//            thisActivity.startService(BTDBIntent);
+//        }
 
         btStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //btStart
-                if(!isStart) {
+                if(!isStartBTDB) {
                     btStart.setText("Stop Listening");
-                    isStart = true;
+                    isStartBTDB = true;
                     String silentDBText = silentDB.getText() + "";
                     String issueTimeText = issueTime.getText() + "";
                     int silentDB = 50;
@@ -264,21 +270,21 @@ public class BluetoothStateFragment extends Fragment {
                     if (isRecord) {
                         btStart.setText("Listening, click to stop");
                         //tool.startGetNoise();
-                        intent = new Intent(thisActivity, NotificationService.class);
-                        intent.putExtra(Constant.INTENT_EXTRA_ISSUE_TIME,issueTime);
-                        intent.putExtra(Constant.INTENT_EXTRA_SILENT_DB,silentDB);
-                        intent.putExtra("messenger", new Messenger(DBhandler));
-                        thisActivity.startService(intent);
+                        BTDBIntent.putExtra(Constant.INTENT_EXTRA_ISSUE_TIME,issueTime);
+                        BTDBIntent.putExtra(Constant.INTENT_EXTRA_SILENT_DB,silentDB);
+                        BTDBIntent.putExtra("messenger", new Messenger(DBhandler));
+                        thisActivity.startService(BTDBIntent);
                     }else{
                         Toast.makeText(thisActivity, "Record Permission Denied!!!", Toast.LENGTH_SHORT).show();
                     }
                 }//btStop
                 else{
                     btStart.setText("Start Listening");
-                    isStart = false;
-                    thisActivity.stopService(intent);
+                    isStartBTDB = false;
+                    thisActivity.stopService(BTDBIntent);
                     //tool.stopGetVoice();
                 }
+                pf.putBooleanStatus("startDB",isStartBTDB);
             }
         });
         return root;
@@ -319,9 +325,14 @@ public class BluetoothStateFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        mBtConnectionManager.cleanup();
+        if(mBtConnectionManager!=null)mBtConnectionManager.cleanup();
         //tool.stopGetVoice();
-        thisActivity.unregisterReceiver(btReceiver);
+        try {
+            thisActivity.unregisterReceiver(btReceiver);
+        }catch(IllegalArgumentException e){
+            Log.e(TAG,"already unregiste btReceiver");
+        }
+        Log.i(TAG,"onDestory");
     }
 
     private class BluetoothReceiver extends BroadcastReceiver {
