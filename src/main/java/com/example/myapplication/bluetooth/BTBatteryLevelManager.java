@@ -63,7 +63,7 @@ public class BTBatteryLevelManager {
         mThread.start();
     }
 
-    private int getBluetoothDeviceBattery(String address){
+    private int getBluetoothDeviceBattery(String name){
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         int level = -1;
         //获取BluetoothAdapter的Class对象
@@ -79,8 +79,9 @@ public class BTBatteryLevelManager {
                 //获取在系统蓝牙的配对列表中的设备--！已连接设备包含在其中
                 Set<BluetoothDevice> devices = btAdapter.getBondedDevices();
                 for (BluetoothDevice device : devices) {
+                    String deviceName = device.getName();
                     String deviceAd = device.getAddress();
-                    if(!(address.equals(deviceAd.substring(0,8)))) continue;
+                    if(!(deviceName.contains(name))) continue;
                     Method batteryMethod = BluetoothDevice.class.getDeclaredMethod("getBatteryLevel", (Class[]) null);
                     batteryMethod.setAccessible(true);
                     Method isConnectedMethod = BluetoothDevice.class.getDeclaredMethod("isConnected", (Class[]) null);
@@ -88,11 +89,8 @@ public class BTBatteryLevelManager {
                     boolean isConnected = (boolean) isConnectedMethod.invoke(device, (Object[]) null);
                     level = (int) batteryMethod.invoke(device, (Object[]) null);
                     if (device != null && level > 0 && isConnected) {
-                        String deviceName = device .getName();
-                        //Log.d(TAG, deviceName + "    Battery:  " + level);
-                        //Write it to SDCARD /storage/emulated/0
-                        String tmp = "time:"+new Date(System.currentTimeMillis())+" battery:"+level;
-                        Log.i(TAG,"path size:"+MyUtils.getFileSize(path));
+                        String tmp = "time:"+new Date(System.currentTimeMillis())+" "+deviceName+" "+deviceAd+" battery:"+level;
+                        Log.i(TAG,tmp);
                         if(MyUtils.getFileSize(path)>0){
                             Log.i(TAG,"append false");
                             MyUtils.writeFileData(path,tmp,false);
@@ -101,7 +99,7 @@ public class BTBatteryLevelManager {
                         }
                     }else if(!isConnected){
                         //disconnected
-                        String tmp = "time:"+new Date(System.currentTimeMillis())+" Disconnected";
+                        String tmp = "time:"+new Date(System.currentTimeMillis())+" "+deviceName+" "+deviceAd+" Disconnected";
                         MyUtils.writeFileData(path,tmp,true);
                     }
                 }

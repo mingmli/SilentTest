@@ -140,6 +140,7 @@ public class SilentTools {
                     if(isSilentIssue()){
                         Message msg1 = Message.obtain();
                         msg1.what = Constant.MESSAGE_ISSILENT;
+                        isGetVoiceRun = false;
                         try {
                             myHandler.send(msg1);
                             isGetVoiceRun = false;//Avoid trigger many times

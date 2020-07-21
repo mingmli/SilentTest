@@ -1,5 +1,7 @@
 package com.example.myapplication.bluetooth;
 
+import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,7 +11,9 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
 
@@ -35,6 +39,8 @@ public class NotificationService extends Service {
             AudioFormat.CHANNEL_IN_DEFAULT, AudioFormat.ENCODING_PCM_16BIT);
     Thread mThread;
     private boolean isStartListen = true;
+    private Notification mNoti;
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -48,13 +54,7 @@ public class NotificationService extends Service {
         issueTime = intent.getIntExtra(Constant.INTENT_EXTRA_ISSUE_TIME,10000);
         silentDB = intent.getIntExtra(Constant.INTENT_EXTRA_SILENT_DB,50);
         Log.i(TAG, "issueTime:"+issueTime+" silentDB:"+ silentDB);
-        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                SAMPLE_RATE_IN_HZ, AudioFormat.CHANNEL_IN_DEFAULT,
-                AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
-        if (mAudioRecord == null) {
-            Log.e("sound", "mAudioRecord failed to init");
-        }
-        mAudioRecord.startRecording();
+
         if(tool==null)
             tool = new SilentTools(mMessenger,this,mAudioRecord);
         tool.setIssueTime(issueTime);
@@ -67,7 +67,13 @@ public class NotificationService extends Service {
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-
+        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
+                SAMPLE_RATE_IN_HZ, AudioFormat.CHANNEL_IN_DEFAULT,
+                AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
+        if (mAudioRecord == null) {
+            Log.e("sound", "mAudioRecord failed to init");
+        }
+        mAudioRecord.startRecording();
         showNotification("listening BT DB...");
     }
     private void showNotification(String db){
@@ -79,7 +85,8 @@ public class NotificationService extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"mychannel").setContentTitle("SilentAPP").setContentText(db)
                 .setSmallIcon(R.drawable.ic_launcher_background).setContentIntent(pendingIntent);
         notificationManager.createNotificationChannel(mChannel);
-        notificationManager.notify(NOTIFICATION,builder.build());
+        mNoti = builder.build();
+        notificationManager.notify(NOTIFICATION,mNoti);
         startForeground(NOTIFICATION,builder.build());
     }
 

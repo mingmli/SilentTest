@@ -76,7 +76,6 @@ public class BluetoothStateFragment extends Fragment {
     PrefStatusUtil pf;
     Intent btStatusNoIntent;
 
-
     @Override
     public void onResume() {
         //Click notification to resume
@@ -138,7 +137,7 @@ public class BluetoothStateFragment extends Fragment {
                     case Constant.MESSAGE_DB:
                         String DB = msg.obj.toString();
                         //Log.i(TAG,"DB:"+DB);
-                        tx.setText(DB+"");
+                        tx.setText(DB);
                         if(isShowChart && isUpdateChart) {
                             if ("-Infinity".equals(msg.obj.toString())) {
                                 degree = 0f;
@@ -249,6 +248,7 @@ public class BluetoothStateFragment extends Fragment {
             public void onClick(View v) {
                 //btStart
                 if(!isStartBTDB) {
+                    //mPassDataToActivity.passDateToActivity("passFromBT","data");
                     btStart.setText("Stop Listening");
                     isStartBTDB = true;
                     String silentDBText = silentDB.getText() + "";
@@ -328,7 +328,9 @@ public class BluetoothStateFragment extends Fragment {
         if(mBtConnectionManager!=null)mBtConnectionManager.cleanup();
         //tool.stopGetVoice();
         try {
-            thisActivity.unregisterReceiver(btReceiver);
+            if(thisActivity!=null) {
+                thisActivity.unregisterReceiver(btReceiver);
+            }
         }catch(IllegalArgumentException e){
             Log.e(TAG,"already unregiste btReceiver");
         }

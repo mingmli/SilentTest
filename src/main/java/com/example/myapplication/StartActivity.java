@@ -3,24 +3,23 @@ package com.example.myapplication;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 
+import com.example.myapplication.bluetooth.BluetoothStateFragment;
 import com.example.myapplication.wifi.WifiStateFragment;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class StartActivity extends AppCompatActivity {
+public class StartActivity extends AppCompatActivity implements PassDataToActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private NavController navController;
@@ -33,14 +32,14 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        //FloatingActionButton fab = findViewById(R.id.fab);
+        /*fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -53,6 +52,10 @@ public class StartActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         checkIfGoBtStateFrag(savedInstanceState);
+        if(getFragment(BluetoothStateFragment.class)!=null) {
+            Log.i(TAG,"not null");
+            ((BluetoothStateFragment) getFragment(BluetoothStateFragment.class)).setPassDataToActivityListener(this);
+        }
     }
 
     @Override
@@ -101,5 +104,21 @@ public class StartActivity extends AppCompatActivity {
                 break;
         }
 
+    }
+
+    @Override
+    public void passDateToActivity(String key, String value) {
+        Log.i(TAG,"key:"+key);
+    }
+
+    private Fragment getFragment(Class<?> cls){
+        NavHostFragment navHF =  (NavHostFragment)this.getSupportFragmentManager().getFragments().get(0);
+        Log.i(TAG,"f:size:"+navHF.getChildFragmentManager().getFragments().size());
+        for(Fragment f :  navHF.getChildFragmentManager().getFragments()){
+            if(cls.isAssignableFrom(f.getClass())){
+                return f;
+            }
+        }
+        return null;
     }
 }
