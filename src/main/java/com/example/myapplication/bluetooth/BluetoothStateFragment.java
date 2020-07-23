@@ -249,8 +249,6 @@ public class BluetoothStateFragment extends Fragment {
                 //btStart
                 if(!isStartBTDB) {
                     //mPassDataToActivity.passDateToActivity("passFromBT","data");
-                    btStart.setText("Stop Listening");
-                    isStartBTDB = true;
                     String silentDBText = silentDB.getText() + "";
                     String issueTimeText = issueTime.getText() + "";
                     int silentDB = 50;
@@ -274,6 +272,7 @@ public class BluetoothStateFragment extends Fragment {
                         BTDBIntent.putExtra(Constant.INTENT_EXTRA_SILENT_DB,silentDB);
                         BTDBIntent.putExtra("messenger", new Messenger(DBhandler));
                         thisActivity.startService(BTDBIntent);
+                        isStartBTDB = true;
                     }else{
                         Toast.makeText(thisActivity, "Record Permission Denied!!!", Toast.LENGTH_SHORT).show();
                     }

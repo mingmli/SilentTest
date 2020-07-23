@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,12 +20,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class StartActivity extends AppCompatActivity implements PassDataToActivity {
+public class StartActivity extends AppCompatActivity{
 
     private AppBarConfiguration mAppBarConfiguration;
     private NavController navController;
     private WifiStateFragment mWifiFragment;
     private String TAG = "Silent_StartActivity";
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +34,7 @@ public class StartActivity extends AppCompatActivity implements PassDataToActivi
         setContentView(R.layout.activity_start);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mContext = this;
         //FloatingActionButton fab = findViewById(R.id.fab);
         /*fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,10 +55,6 @@ public class StartActivity extends AppCompatActivity implements PassDataToActivi
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         checkIfGoBtStateFrag(savedInstanceState);
-        if(getFragment(BluetoothStateFragment.class)!=null) {
-            Log.i(TAG,"not null");
-            ((BluetoothStateFragment) getFragment(BluetoothStateFragment.class)).setPassDataToActivityListener(this);
-        }
     }
 
     @Override
@@ -104,21 +103,5 @@ public class StartActivity extends AppCompatActivity implements PassDataToActivi
                 break;
         }
 
-    }
-
-    @Override
-    public void passDateToActivity(String key, String value) {
-        Log.i(TAG,"key:"+key);
-    }
-
-    private Fragment getFragment(Class<?> cls){
-        NavHostFragment navHF =  (NavHostFragment)this.getSupportFragmentManager().getFragments().get(0);
-        Log.i(TAG,"f:size:"+navHF.getChildFragmentManager().getFragments().size());
-        for(Fragment f :  navHF.getChildFragmentManager().getFragments()){
-            if(cls.isAssignableFrom(f.getClass())){
-                return f;
-            }
-        }
-        return null;
     }
 }

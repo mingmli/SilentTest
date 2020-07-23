@@ -21,7 +21,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.navigation.NavDeepLinkBuilder;
 
 import com.example.myapplication.Constant;
-import com.example.myapplication.PrefStatusUtil;
 import com.example.myapplication.R;
 import com.example.myapplication.StartActivity;
 
@@ -54,7 +53,13 @@ public class NotificationService extends Service {
         issueTime = intent.getIntExtra(Constant.INTENT_EXTRA_ISSUE_TIME,10000);
         silentDB = intent.getIntExtra(Constant.INTENT_EXTRA_SILENT_DB,50);
         Log.i(TAG, "issueTime:"+issueTime+" silentDB:"+ silentDB);
-
+        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
+                SAMPLE_RATE_IN_HZ, AudioFormat.CHANNEL_IN_DEFAULT,
+                AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
+        if (mAudioRecord == null) {
+            Log.e("sound", "mAudioRecord failed to init");
+        }
+        mAudioRecord.startRecording();
         if(tool==null)
             tool = new SilentTools(mMessenger,this,mAudioRecord);
         tool.setIssueTime(issueTime);
@@ -67,13 +72,6 @@ public class NotificationService extends Service {
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                SAMPLE_RATE_IN_HZ, AudioFormat.CHANNEL_IN_DEFAULT,
-                AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
-        if (mAudioRecord == null) {
-            Log.e("sound", "mAudioRecord failed to init");
-        }
-        mAudioRecord.startRecording();
         showNotification("listening BT DB...");
     }
     private void showNotification(String db){
@@ -97,7 +95,7 @@ public class NotificationService extends Service {
         super.onDestroy();
         isStartListen = false;
         if(tool!=null)
-           tool.stopGetVoice();
+            tool.stopGetVoice();
         if(notificationManager!=null)
             notificationManager.cancel(NOTIFICATION);
     }
@@ -105,6 +103,7 @@ public class NotificationService extends Service {
     public void onClearNotify(){
         stopForeground(true);
     }
+
 
 
 }
