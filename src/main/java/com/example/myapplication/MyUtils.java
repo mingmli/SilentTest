@@ -37,6 +37,7 @@ public class MyUtils {
         StringBuilder sb = new StringBuilder(2048);
         sb.append(value + "\n\n");
         dbox.addText(evtType, sb.toString());
+        mLastGenerateTimestamp = currentGenerateTimestamp;
         Log.d(TAG, "Added Drop box entry - " + evtType + " " + value );
     }
 
