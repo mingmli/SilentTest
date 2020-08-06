@@ -42,4 +42,9 @@
         android:name="com.example.myapplication.wifi.WifiStateFragment"
         android:label="@string/menu_wifi_state"
         tools:layout="@layout/fragment_wifi" />
+    <fragment
+        android:id="@+id/nav_bt_sco"
+        android:name="com.example.myapplication.bluetooth.BTScoFragment"
+        android:label="@string/menu_bt_sco"
+        tools:layout="@layout/fragment_bt_sco" />
 </navigation>
