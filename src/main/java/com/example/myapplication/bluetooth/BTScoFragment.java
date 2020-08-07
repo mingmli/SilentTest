@@ -11,20 +11,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class BTScoFragment extends Fragment {
     private Button btStartSco;
     private Button btChangeRoute;
     private static final String TAG = "Silent_BTSco";
-    private MediaPlayer mMPlayer;
-    private MediaPlayer mMplayer2;
+    private MediaPlayer mMPlayerA2DP;
+    private MediaPlayer mMplayerSCO;
     private AudioManager mAManager;
     private Context thisActivity;
     private boolean isStart = false;
@@ -37,16 +39,28 @@ public class BTScoFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_bt_sco, container, false);
         thisActivity = getActivity();
         mAManager =(AudioManager)(thisActivity.getSystemService(Context.AUDIO_SERVICE));
-        mMPlayer = new MediaPlayer();
+        mMplayerSCO = new MediaPlayer();
+        mMPlayerA2DP = new MediaPlayer();
         try{
-            mMPlayer.setDataSource(new FileInputStream("/storage/emulated/0/sample.mp3").getFD());
-            mMPlayer.setLooping(true);
+            mMplayerSCO.setDataSource(new FileInputStream("/storage/emulated/0/sampleSCO.mp3").getFD());
+            mMplayerSCO.setLooping(true);
             AudioAttributes audioAttributesSCO = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build();
-            mMPlayer.setAudioAttributes(audioAttributesSCO);
+            mMplayerSCO.setAudioAttributes(audioAttributesSCO);
             //mMPlayer.setAudioStreamType(AudioManager.STREAM_VOICE_CALL);
-        }catch(Exception e){
+            mMplayerSCO.prepare();
+
+            mMPlayerA2DP.setDataSource(new FileInputStream("/storage/emulated/0/sampleA2DP.mp3").getFD());
+            mMPlayerA2DP.setLooping(true);
+            AudioAttributes audioAttributesA2DP = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build();
+            mMPlayerA2DP.setAudioAttributes(audioAttributesA2DP);
+            mMPlayerA2DP.prepare();
+        }catch(FileNotFoundException e){
+            Log.i(TAG,e.getMessage());
+            Toast.makeText(thisActivity,"mp3 Files not found!!", Toast.LENGTH_SHORT).show();
+        }catch (IOException e){
             Log.i(TAG,e.getMessage());
         }
+
         btStartSco = root.findViewById(R.id.btnStartSco);
         btChangeRoute = root.findViewById(R.id.btnChangeRoute);
         txRoute = root.findViewById(R.id.txRoute);
@@ -55,22 +69,16 @@ public class BTScoFragment extends Fragment {
             public void onClick(View v) {
                 if(!isStart) {
                     btChangeRoute.setText(getResources().getText(R.string.bt_route_a2dp));
-                    txRoute.setText(getResources().getText(R.string.bt_route_sco));
+                    txRoute.setText(getResources().getText(R.string.cur_route_sco));
                     btStartSco.setText("STOP playing");
                     isA2DP = false;
-                    try {
-                        isStart = true;
-                        startSco();
-                        mMPlayer.prepare();
-                        mMPlayer.start();
-                    } catch (IOException e) {
-                        Log.i(TAG, e.getMessage());
-                    }
+                    isStart = true;
+                    mMplayerSCO.start();
                 }else{
                     isStart = false;
                     isA2DP = true;
                     btChangeRoute.setText(getResources().getText(R.string.bt_route_sco));
-                    txRoute.setText(getResources().getText(R.string.bt_route_a2dp));
+                    txRoute.setText(getResources().getText(R.string.cur_route_a2dp));
                     btStartSco.setText("START playing");
                     stopPlayer();
                     stopSco();
@@ -83,13 +91,13 @@ public class BTScoFragment extends Fragment {
                 if(isStart){
                     if(isA2DP) {
                         isA2DP = false;
-                        txRoute.setText(getResources().getText(R.string.bt_route_sco));
+                        txRoute.setText(getResources().getText(R.string.cur_route_sco));
                         btChangeRoute.setText(getResources().getText(R.string.bt_route_a2dp));
                         startSco();
                         reStart(false);
                     }else{
                         isA2DP = true;
-                        txRoute.setText(getResources().getText(R.string.bt_route_a2dp));
+                        txRoute.setText(getResources().getText(R.string.cur_route_a2dp));
                         btChangeRoute.setText(getResources().getText(R.string.bt_route_sco));
                         stopSco();
                         reStart(true);
@@ -103,8 +111,6 @@ public class BTScoFragment extends Fragment {
         mAManager.setBluetoothScoOn(false);
         mAManager.stopBluetoothSco();
         mAManager.setMode(AudioManager.MODE_NORMAL);
-
-
     }
     private void startSco(){
         mAManager.setBluetoothScoOn(true);
@@ -112,30 +118,18 @@ public class BTScoFragment extends Fragment {
         mAManager.setMode(AudioManager.MODE_IN_CALL);
     }
     private void stopPlayer(){
-        if(mMPlayer!=null && mMPlayer.isPlaying())mMPlayer.stop();
+        if(mMplayerSCO!=null && mMplayerSCO.isPlaying())mMplayerSCO.stop();
+        if(mMPlayerA2DP!=null && mMPlayerA2DP.isPlaying())mMPlayerA2DP.stop();
     }
-    private void reStart(boolean isA2dp){
-        stopPlayer();
-        //Need reset to reset the streamType, or it will be failed
-        mMPlayer.reset();
-        try {
-            mMPlayer.setDataSource(new FileInputStream("/storage/emulated/0/sample.mp3").getFD());
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
-        }
+    private void reStart(boolean isA2dp) {
         if(isA2dp){
-            AudioAttributes audioAttributesA2DP = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build();
-            mMPlayer.setAudioAttributes(audioAttributesA2DP);
+            if(mMPlayerA2DP.isPlaying()) return;
+            if(mMplayerSCO!=null && mMplayerSCO.isPlaying())mMplayerSCO.pause();
+            mMPlayerA2DP.start();
         }else{
-            AudioAttributes audioAttributesSCO = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build();
-            mMPlayer.setAudioAttributes(audioAttributesSCO);
-        }
-        mMPlayer.setLooping(true);
-        try{
-            mMPlayer.prepare();
-            mMPlayer.start();
-        } catch (IOException e) {
-            Log.i(TAG, e.getMessage());
+            if(mMPlayerA2DP!=null && mMPlayerA2DP.isPlaying())mMPlayerA2DP.pause();
+            if(mMplayerSCO.isPlaying())return;
+            mMplayerSCO.start();
         }
     }
     @Override

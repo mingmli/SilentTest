@@ -34,5 +34,13 @@
         android:text="@string/cur_route_a2dp"
         android:textSize="20sp"
         />
+    <TextView
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/note_bt_sco"
+        android:textColor="#F44336"
+        android:textSize="12sp"
+        />
 
 </LinearLayout>

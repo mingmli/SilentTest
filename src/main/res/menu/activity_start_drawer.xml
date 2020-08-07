@@ -18,7 +18,7 @@
             android:title="@string/menu_wifi_state" />
         <item
             android:id="@+id/nav_bt_sco"
-            android:icon="@drawable/ic_menu_bt"
+            android:icon="@drawable/ic_menu_sco"
             android:title="@string/menu_bt_sco" />
     </group>
 </menu>

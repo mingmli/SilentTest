@@ -30,4 +30,5 @@
     <string name="menu_bt_sco">BT SCO</string>
 
     <string name="home_second">Home Second</string>
+    <string name="note_bt_sco">Please push sampleA2DP.mp3, sampleSCO.mp3 into sdcard before testing</string>
 </resources>
