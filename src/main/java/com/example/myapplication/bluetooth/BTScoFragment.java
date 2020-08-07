@@ -20,6 +20,9 @@ import com.example.myapplication.R;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Time;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class BTScoFragment extends Fragment {
     private Button btStartSco;
@@ -32,6 +35,9 @@ public class BTScoFragment extends Fragment {
     private boolean isStart = false;
     private boolean isA2DP = true;
     private TextView txRoute;
+    private Button btAutoTest;
+    private boolean isAuto = false;
+    private TimerTask timerTask;
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -59,11 +65,15 @@ public class BTScoFragment extends Fragment {
             Toast.makeText(thisActivity,"mp3 Files not found!!", Toast.LENGTH_SHORT).show();
         }catch (IOException e){
             Log.i(TAG,e.getMessage());
+        }catch (IllegalStateException e){
+            Log.i(TAG,e.getMessage());
+            Toast.makeText(thisActivity,"mp3 Files prepare failed!", Toast.LENGTH_SHORT).show();
         }
 
         btStartSco = root.findViewById(R.id.btnStartSco);
         btChangeRoute = root.findViewById(R.id.btnChangeRoute);
         txRoute = root.findViewById(R.id.txRoute);
+        btAutoTest = root.findViewById(R.id.btnAutoTest);
         btStartSco.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,6 +115,36 @@ public class BTScoFragment extends Fragment {
                 }
             }
         });
+
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if(isAuto) {
+                    btChangeRoute.callOnClick();
+                }else{
+                    //Do nothing
+                }
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(timerTask, 2000, 2000);
+        btAutoTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isStart){
+                    isAuto = false;
+                    return;
+                }
+                if(!isAuto) {
+                    isAuto = true;
+                    btAutoTest.setText(getResources().getText(R.string.disAutoT));
+                }else{
+                    btAutoTest.setText(getResources().getText(R.string.autoT));
+                    isAuto = false;
+
+                }
+            }
+        });
         return root;
     }
     private void stopSco(){
@@ -123,8 +163,8 @@ public class BTScoFragment extends Fragment {
     }
     private void reStart(boolean isA2dp) {
         if(isA2dp){
-            if(mMPlayerA2DP.isPlaying()) return;
             if(mMplayerSCO!=null && mMplayerSCO.isPlaying())mMplayerSCO.pause();
+            if(mMPlayerA2DP.isPlaying()) return;
             mMPlayerA2DP.start();
         }else{
             if(mMPlayerA2DP!=null && mMPlayerA2DP.isPlaying())mMPlayerA2DP.pause();

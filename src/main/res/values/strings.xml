@@ -22,7 +22,8 @@
     <string name="nav_header_subtitle">wisl@motorola.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-
+    <string name="autoT">AutoTest</string>
+    <string name="disAutoT">Stop AutoTest</string>
     <string name="menu_home">Home</string>
     <string name="menu_bt_state">BT State</string>
     <string name="menu_bt_battery">BT Battery</string>
